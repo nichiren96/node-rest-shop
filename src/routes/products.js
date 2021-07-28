@@ -5,9 +5,21 @@ const mongoose = require('mongoose')
 const Product = require('../models/product')
 
 router.get('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'Handling GET requests to /products'
-    })
+   Product.find()
+        .exec()
+        .then(docs => {
+            console.log(docs)
+            if(docs.length > 0) {
+                res.status(200).json(docs)
+            }else {
+                 res.status(404).json({message: 'No entries found'})
+            }
+            
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({message: err})
+        })
 })
 
 router.post('/', (req, res, next) => {
@@ -39,7 +51,12 @@ router.get('/:productId', (req, res, next) => {
         .exec()
         .then(doc => {
             console.log(doc)
-            res.status(200).json(doc)
+            if(doc) {
+                res.status(200).json(doc)
+            }else {
+                res.status(404).json({message: 'No entry found for the provided ID'})
+            }
+            
         })
         .catch(err => {
             console.log(err)
@@ -49,19 +66,32 @@ router.get('/:productId', (req, res, next) => {
 })
 
 router.patch('/:productId', (req, res, next) => {
-   
-    res.status(200).json({
-        message: 'Updated product'
-    })
+    const id = req.params.productId
+    const updateOps = {}
+    for(const ops of req.body) {
+        updateOps[ops.propName] = ops.value
+    }
+    console.table(updateOps)
 
+    Product.findByIdAndUpdate(id, updateOps, (err, doc)=>{
+        if(err){
+            console.log(err)
+            res.status(500).json({error: err})
+        }else {
+            res.status(200).json(doc)
+        }
+    })
 })
 
 router.delete('/:productId', (req, res, next) => {
-   
-    res.status(200).json({
-        message: 'Deleted product'
-    })
-
+    const id = req.params.productId
+    Product.remove({_id: id})
+        .then(result => {
+             res.status(200).json(result)
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
 })
 
 module.exports = router
