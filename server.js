@@ -1,7 +1,11 @@
-const http = require('http')
-const app = require('./src/app')
-const port = process.env.PORT || 9201
+const http = require("http");
+const dotenv = require("dotenv");
 
-const server = http.createServer(app)
+dotenv.config({ path: "./.env" });
 
-server.listen(port, () => console.log(`Server listening on port ${port}`))
+const app = require("./src/app");
+const port = process.env.PORT || 8000;
+
+const server = http.createServer(app);
+
+server.listen(port, () => console.log(`Server is listening on port ${port}`));
